@@ -1,7 +1,7 @@
 const INF = 99999999;
 
 
-function dfs(graph, visited, source, compNum) {
+export function dfs(graph, visited, source, compNum) {
     let stack = [source];
     while (stack.length > 0) {
         let node = stack.pop();
@@ -19,7 +19,7 @@ function dfs(graph, visited, source, compNum) {
     }
 }
 
-function countComponents(graph) {
+export function countComponents(graph) {
     let visited = Array(graph.length).fill(0);
 
     let compNow = 0;
@@ -34,7 +34,7 @@ function countComponents(graph) {
 }
 
 // TODO: upgrade with heap
-function Dijkstra(graph, source, target) {
+export function Dijkstra(graph, source, target) {
     let n = graph.length;
     let visited = new Array(n).fill(false);
     let dist = new Array(n).fill(INF);
