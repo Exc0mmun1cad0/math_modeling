@@ -1,5 +1,8 @@
-function dfs(graph, visited, start, compNum) {
-    let stack = [start];
+const INF = 99999999;
+
+
+function dfs(graph, visited, source, compNum) {
+    let stack = [source];
     while (stack.length > 0) {
         let node = stack.pop();
 
@@ -28,4 +31,51 @@ function countComponents(graph) {
     }
 
     return compNow
+}
+
+// TODO: upgrade with heap
+function Dijkstra(graph, source, target) {
+    let n = graph.length;
+    let visited = new Array(n).fill(false);
+    let dist = new Array(n).fill(INF);
+    dist[source] = 0;
+    let prev = new Array(n).fill(0);
+    prev[source] = -1;
+
+    for (let q = 0; q < n; q++) {
+        let minV = -1;
+        let minDist = INF;
+        for (let v = 0; v < n; v++) {
+            let distance = dist[v];
+            if (minDist  >= distance && !visited[v]) {
+                minDist = distance;
+                minV = v;
+            }
+        }
+
+        for (let entry of graph[minV]) {
+            let neighbour = entry[0], nDist = entry[1];
+            if (nDist + dist[minV] < dist[neighbour]) {
+                dist[neighbour] = nDist + dist[minV];
+                prev[neighbour] = minV;
+            }
+        }
+        visited[minV] = true;
+    }
+
+    if (dist[target] == INF) {
+        return {}
+    }
+
+    let curr = target;
+    let path = new Array();
+    while (curr != -1) {
+        path.push(curr);
+        curr = prev[curr];
+    }
+
+    return {
+        dist: dist[target],
+        path: path.reverse()
+    };
 }
