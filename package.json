@@ -1,0 +1,24 @@
+{
+  "name": "graph_visualization",
+  "version": "1.0.0",
+  "description": "Часть реферата по предмету \"Математическое моделирование\".",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Exc0mmun1cad0/math_modeling.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Exc0mmun1cad0/math_modeling/issues"
+  },
+  "homepage": "https://github.com/Exc0mmun1cad0/math_modeling#readme",
+  "dependencies": {
+    "express": "^5.2.1",
+    "http-server": "^14.1.1"
+  }
+}
