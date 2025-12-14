@@ -7,7 +7,12 @@ let minEdgeWeight = 1;
 let maxEdgeWeight = 10
 
 let graph = null;
+
 let network = null;
+let nodes = null;
+let edges = null;
+let edgesMap = new Map();
+let highlightedEdgeIds = new Set();
 
 let source = 0;
 let target = 99;
@@ -22,9 +27,11 @@ function initGraph() {
 }
 
 
-function renderGraph(path = null) {    
+function renderGraph() {    
+    edgesMap.clear();
+
     // visualization
-    var nodes = new vis.DataSet(
+    nodes = new vis.DataSet(
         Array.from(
             { length: numberOfVertexes}, (_, i) => {
                 return { 
@@ -37,34 +44,29 @@ function renderGraph(path = null) {
         )
     )
 
-    let highlightEdges = new Set();
-    if (path !== null) {
-        for (let i = 0; i < path.length-1; i++) {
-            highlightEdges.add(`${path[i]}-${path[i+1]}`)
-            highlightEdges.add(`${path[i+1]}-${path[i]}`)
-        }
-    }
-    console.log(highlightEdges);
     let addedEdges = new Set();
     let edgeObjs = new Array();
+    let currEdgeId = 100;
     for (let i = 0; i < graph.length; i++) {
         let edges = graph[i];
         for (let edge of edges) {
             if (addedEdges.has(`${edge[0]}-${i}`)) 
                 continue;
+            currEdgeId++;
             edgeObjs.push({
+                id: currEdgeId,
                 from: i,
                 to: edge[0],
                 label: `${edge[1]}`,
                 arrows: ''
             })
             let addedEdge = `${i}-${edge[0]}`
-            if (highlightEdges.has(addedEdge))
-                edgeObjs[edgeObjs.length-1]["color"] = "red";
-            addedEdges.add(`${i}-${edge[0]}`);
+            addedEdges.add(addedEdge);
+            edgesMap.set(addedEdge, currEdgeId);
+            edgesMap.set(`${edge[0]}-${i}`, currEdgeId);
         }
     }
-    let edges = new vis.DataSet(edgeObjs); 
+    edges = new vis.DataSet(edgeObjs); 
 
     var container = document.getElementById("network");
     var data = {
@@ -83,6 +85,23 @@ function renderGraph(path = null) {
     network = new vis.Network(container, data, options);
 }
 
+function highlightPath(path) {
+    if (highlightedEdgeIds.size != 0)
+        for (let id of highlightedEdgeIds)
+            edges.update({ id: id, color: { color: "#1680c2ff" }, width: 1 });
+    highlightedEdgeIds.clear();
+
+    for (let i = 0; i < path.length-1; i++) {
+        let edgeId = edgesMap.get(`${path[i]}-${path[i+1]}`);
+        edges.update({
+            id: edgeId,
+            color: { color: "red" },
+            width: 4,
+        });
+        highlightedEdgeIds.add(edgeId);
+    }
+}
+
 initGraph();
 renderGraph();
 
@@ -91,6 +110,7 @@ document
     .addEventListener("click", () => {
         if (network) network.destroy();
 
+        
         initGraph();
         network = renderGraph(null);
     });
@@ -107,6 +127,7 @@ document
         }
 
         const { dist, path } = Dijkstra(graph, start, end);
-        renderGraph(path);
 
+        console.log(path);
+        highlightPath(path);
     })
