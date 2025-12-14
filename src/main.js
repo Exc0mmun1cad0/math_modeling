@@ -130,4 +130,10 @@ document
 
         console.log(path);
         highlightPath(path);
+
+        const resultDiv = document.getElementById("result");
+        resultDiv.innerHTML = `
+            <b>Длина пути:</b> ${dist}<br>
+            <b>Путь:</b> ${path.join(" → ")}
+        `;
     })
