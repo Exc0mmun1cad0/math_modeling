@@ -1,5 +1,5 @@
 import { generateGraph } from "./generate_graph.js";
-import { Dijkstra } from "./graph_algorithms.js";
+import { Dijkstra, DijkstraWithHeap } from "./graph_algorithms.js";
 
 let maxVertexDegree = 4;
 let numberOfVertexes = 100;
@@ -126,7 +126,7 @@ document
             return;
         }
 
-        const { dist, path } = Dijkstra(graph, start, end);
+        const { dist, path } = DijkstraWithHeap(graph, start, end);
 
         console.log(path);
         highlightPath(path);
