@@ -22,6 +22,20 @@
     <body>
         <div id="network"></div>
 
+        <button id="regen-btn">Новый граф</button>
+
+        <div id="controls" style="margin-bottom: 10px;">
+            <label>Начало: 
+                <input type="number" id="source" min="0" max="99" value="0">
+            </label>
+
+            <label>Конец: 
+                <input type="number" id="target" min="0" max="99" value="99">
+            </label>
+
+            <button id="findPath-btn">Найти путь</button>
+        </div>
+
         <script type="module" src="src/main.js"></script>
     </body>
 </html>
