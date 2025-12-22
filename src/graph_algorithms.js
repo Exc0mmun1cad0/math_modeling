@@ -79,59 +79,81 @@ export function Dijkstra(graph, source, target) {
     };
 }
 
-class MinHeap {
-    constructor() {
-        this.heap = [];
+class FastMinHeap {
+    constructor(capacity = 1024) {
+        // Используем типизированные массивы для максимальной скорости
+        this.nodes = new Int32Array(capacity);
+        this.priorities = new Float64Array(capacity);
+        this.length = 0;
+    }
+
+    _resize() {
+        const newCapacity = this.nodes.length * 2;
+        const newNodes = new Int32Array(newCapacity);
+        const newPriorities = new Float64Array(newCapacity);
+        newNodes.set(this.nodes);
+        newPriorities.set(this.priorities);
+        this.nodes = newNodes;
+        this.priorities = newPriorities;
     }
 
     isEmpty() {
-        return this.heap.length === 0;
+        return this.length === 0;
     }
 
     push(node, priority) {
-        this.heap.push({ node, priority });
-        this._siftUp(this.heap.length - 1);
-    }
+        if (this.length === this.nodes.length) this._resize();
 
-    pop() {
-        if (this.isEmpty()) return null;
+        let i = this.length++;
+        this.nodes[i] = node;
+        this.priorities[i] = priority;
 
-        const min = this.heap[0];
-        const last = this.heap.pop();
-
-        if (!this.isEmpty()) {
-            this.heap[0] = last;
-            this._siftDown(0);
-        }
-
-        return min;
-    }
-
-    _siftUp(i) {
+        // Sift Up
         while (i > 0) {
-            const p = Math.floor((i - 1) / 2);
-            if (this.heap[p].priority <= this.heap[i].priority) break;
-            [this.heap[p], this.heap[i]] = [this.heap[i], this.heap[p]];
+            const p = (i - 1) >> 1;
+            if (this.priorities[p] <= this.priorities[i]) break;
+            this._swap(i, p);
             i = p;
         }
     }
 
-    _siftDown(i) {
-        const n = this.heap.length;
-        while (true) {
-            let smallest = i;
-            const l = 2 * i + 1;
-            const r = 2 * i + 2;
+    pop() {
+        if (this.length === 0) return null;
 
-            if (l < n && this.heap[l].priority < this.heap[smallest].priority)
-                smallest = l;
-            if (r < n && this.heap[r].priority < this.heap[smallest].priority)
-                smallest = r;
+        const resNode = this.nodes[0];
+        const resPriority = this.priorities[0];
 
-            if (smallest === i) break;
-            [this.heap[i], this.heap[smallest]] = [this.heap[smallest], this.heap[i]];
-            i = smallest;
+        this.length--;
+        if (this.length > 0) {
+            this.nodes[0] = this.nodes[this.length];
+            this.priorities[0] = this.priorities[this.length];
+            
+            // Sift Down
+            let i = 0;
+            while (true) {
+                let s = i;
+                const l = (i << 1) + 1;
+                const r = (i << 1) + 2;
+
+                if (l < this.length && this.priorities[l] < this.priorities[s]) s = l;
+                if (r < this.length && this.priorities[r] < this.priorities[s]) s = r;
+                if (s === i) break;
+
+                this._swap(i, s);
+                i = s;
+            }
         }
+
+        return { node: resNode, priority: resPriority };
+    }
+
+    _swap(i, j) {
+        const tempNode = this.nodes[i];
+        const tempPriority = this.priorities[i];
+        this.nodes[i] = this.nodes[j];
+        this.priorities[i] = this.priorities[j];
+        this.nodes[j] = tempNode;
+        this.priorities[j] = tempPriority;
     }
 }
 
@@ -143,7 +165,7 @@ export function DijkstraWithHeap(graph, source, target) {
 
     dist[source] = 0;
 
-    const pq = new MinHeap();
+    const pq = new FastMinHeap();
     pq.push(source, 0);
 
     while (!pq.isEmpty()) {

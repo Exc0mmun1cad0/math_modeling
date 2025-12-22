@@ -17,15 +17,31 @@ let highlightedEdgeIds = new Set();
 let source = 0;
 let target = 99;
 
-function initGraph() {
+function initGraph(seed) {
     graph = generateGraph(
         numberOfVertexes,
         maxVertexDegree,
         minEdgeWeight,
-        maxEdgeWeight
+        maxEdgeWeight,
+        seed
     );
 }
 
+function getSeed() {
+    const value = document.getElementById("seed").value;
+    const seed = Number(value);
+
+    if (!Number.isInteger(seed)) {
+        alert("Seed должен быть целым числом");
+    }
+
+    if (seed <= 0) {
+        alert("Seed должен быть положительным числом");
+        return null;
+    }
+
+    return seed;
+}
 
 function renderGraph() {    
     edgesMap.clear();
@@ -74,12 +90,12 @@ function renderGraph() {
         edges: edges
     }
     var options = {
-        physics: {
-            enabled: true,
-            barnesHut: {
-            springLength: 150,
-            },
-        }
+        // physics: {
+        //     enabled: true,
+        //     barnesHut: {
+        //     springLength: 150,
+        //     },
+        // }
     };
 
     network = new vis.Network(container, data, options);
@@ -108,10 +124,14 @@ renderGraph();
 document
     .getElementById("regen-btn")
     .addEventListener("click", () => {
-        if (network) network.destroy();
+        const seed = getSeed();
+        if (seed === null) return;
 
-        
-        initGraph();
+        if (network) {
+            network.destroy();
+        }
+
+        initGraph(seed);
         network = renderGraph(null);
     });
 
@@ -126,9 +146,14 @@ document
             return;
         }
 
+        console.time("dijkstra-with-heap");
         const { dist, path } = DijkstraWithHeap(graph, start, end);
+        console.timeEnd("dijkstra-with-heap");
 
-        console.log(path);
+        console.time("dijkstra");
+        const { dist2, path2 } = Dijkstra(graph, start, end);
+        console.timeEnd("dijkstra");
+
         highlightPath(path);
 
         const resultDiv = document.getElementById("result");

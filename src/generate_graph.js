@@ -1,11 +1,23 @@
+function createSeededRandom(seed) {
+    let state = seed;
+
+    return function() {
+        state = (state * 42871) % 0x7fffffff;
+        return state / 0x7fffffff;
+    }
+}
+
 // TODO: pass all args as one config object
 // TODO: сделать что-то с компонентами связности
 export function generateGraph(
     numberOfVertexes,
     maxVertexDegree,
     minEdgeWeight,
-    maxEdgeWeight
+    maxEdgeWeight,
+    seed = 1
 ) {
+    const rand = createSeededRandom(seed)
+
     const graph = Array.from({ length: numberOfVertexes }, () => []);
     const degree = Array(numberOfVertexes).fill(0);
 
@@ -15,7 +27,7 @@ export function generateGraph(
 
     function addEdge(u, v) {
         const w = Math.floor(
-        Math.random() * (maxEdgeWeight - minEdgeWeight) + minEdgeWeight
+        rand() * (maxEdgeWeight - minEdgeWeight) + minEdgeWeight
         );
 
         graph[u].push([v, w]);
@@ -29,7 +41,7 @@ export function generateGraph(
         let connected = false;
 
         while (!connected) {
-            const v = Math.floor(Math.random() * i);
+            const v = Math.floor(rand() * i);
 
             if (
                 degree[i] < maxVertexDegree &&
@@ -46,8 +58,8 @@ export function generateGraph(
     let attempts = 0;
 
     while (attempts < maxAttempts) {
-        const u = Math.floor(Math.random() * numberOfVertexes);
-        const v = Math.floor(Math.random() * numberOfVertexes);
+        const u = Math.floor(rand() * numberOfVertexes);
+        const v = Math.floor(rand() * numberOfVertexes);
 
         if (
         u !== v &&
