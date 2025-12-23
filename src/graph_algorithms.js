@@ -34,9 +34,11 @@ export function countComponents(graph) {
 }
 
 export function Dijkstra(graph, source, target) {
+    let ops = 0;
+
     let n = graph.length;
     let visited = new Array(n).fill(false);
-    let dist = new Array(n).fill(INF);
+    const dist = new Array(n).fill(INF);
     dist[source] = 0;
     let prev = new Array(n).fill(0);
     prev[source] = -1;
@@ -45,6 +47,8 @@ export function Dijkstra(graph, source, target) {
         let minV = -1;
         let minDist = INF;
         for (let v = 0; v < n; v++) {
+            ops++;
+
             let distance = dist[v];
             if (minDist  >= distance && !visited[v]) {
                 minDist = distance;
@@ -53,6 +57,8 @@ export function Dijkstra(graph, source, target) {
         }
 
         for (let entry of graph[minV]) {
+            ops++
+
             let neighbour = entry[0], nDist = entry[1];
             if (nDist + dist[minV] < dist[neighbour]) {
                 dist[neighbour] = nDist + dist[minV];
@@ -66,16 +72,15 @@ export function Dijkstra(graph, source, target) {
         return {}
     }
 
-    let curr = target;
-    let path = new Array();
-    while (curr != -1) {
-        path.push(curr);
-        curr = prev[curr];
+    const path = [];
+    for (let v = target; v !== -1; v = prev[v]) {
+        path.push(v);
     }
 
     return {
-        dist: dist[target],
-        path: path.reverse()
+        dist2: dist[target],
+        path2: path.reverse(),
+        ops2: ops,
     };
 }
 
@@ -85,6 +90,8 @@ class FastMinHeap {
         this.nodes = new Int32Array(capacity);
         this.priorities = new Float64Array(capacity);
         this.length = 0;
+
+        this.ops = 0;
     }
 
     _resize() {
@@ -98,6 +105,7 @@ class FastMinHeap {
     }
 
     isEmpty() {
+        this.ops++;
         return this.length === 0;
     }
 
@@ -107,10 +115,12 @@ class FastMinHeap {
         let i = this.length++;
         this.nodes[i] = node;
         this.priorities[i] = priority;
+        this.ops++;
 
         // Sift Up
         while (i > 0) {
             const p = (i - 1) >> 1;
+            this.ops++;
             if (this.priorities[p] <= this.priorities[i]) break;
             this._swap(i, p);
             i = p;
@@ -122,6 +132,7 @@ class FastMinHeap {
 
         const resNode = this.nodes[0];
         const resPriority = this.priorities[0];
+        this.ops++;
 
         this.length--;
         if (this.length > 0) {
@@ -135,8 +146,14 @@ class FastMinHeap {
                 const l = (i << 1) + 1;
                 const r = (i << 1) + 2;
 
-                if (l < this.length && this.priorities[l] < this.priorities[s]) s = l;
-                if (r < this.length && this.priorities[r] < this.priorities[s]) s = r;
+                if (l < this.length && this.priorities[l] < this.priorities[s]) {
+                    this.ops++;
+                    s = l
+                }
+                if (r < this.length && this.priorities[r] < this.priorities[s]) {
+                    this.ops++;
+                    s = r
+                }
                 if (s === i) break;
 
                 this._swap(i, s);
@@ -148,6 +165,7 @@ class FastMinHeap {
     }
 
     _swap(i, j) {
+        this.ops++;
         const tempNode = this.nodes[i];
         const tempPriority = this.priorities[i];
         this.nodes[i] = this.nodes[j];
@@ -158,6 +176,8 @@ class FastMinHeap {
 }
 
 export function DijkstraWithHeap(graph, source, target) {
+    let ops = 0;
+
     const n = graph.length;
     const dist = new Array(n).fill(INF);
     const prev = new Array(n).fill(-1);
@@ -170,13 +190,14 @@ export function DijkstraWithHeap(graph, source, target) {
 
     while (!pq.isEmpty()) {
         const { node: u, priority: d } = pq.pop();
-
+        ops++;
         if (visited[u]) continue;
         visited[u] = true;
 
         if (u === target) break;
 
         for (const [v, w] of graph[u]) {
+            ops++;
             if (visited[v]) continue;
 
             const nd = d + w;
@@ -184,6 +205,7 @@ export function DijkstraWithHeap(graph, source, target) {
                 dist[v] = nd;
                 prev[v] = u;
                 pq.push(v, nd);
+                ops++;
             }
         }
     }
@@ -199,6 +221,7 @@ export function DijkstraWithHeap(graph, source, target) {
 
     return {
         dist: dist[target],
-        path: path.reverse()
+        path: path.reverse(),
+        ops: ops + pq.ops
     };
 }

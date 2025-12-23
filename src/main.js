@@ -133,6 +133,12 @@ document
 
         initGraph(seed);
         network = renderGraph(null);
+
+        const resultDiv = document.getElementById("result");
+        resultDiv.innerHTML = `
+        Кратчайший путь не найден
+        `;
+
     });
 
 document
@@ -146,19 +152,25 @@ document
             return;
         }
 
-        console.time("dijkstra-with-heap");
-        const { dist, path } = DijkstraWithHeap(graph, start, end);
-        console.timeEnd("dijkstra-with-heap");
+        // console.time("dijkstra-with-heap");
+        const start1 = performance.now();
+        const { dist, path, ops } = DijkstraWithHeap(graph, start, end);
+        // console.timeEnd("dijkstra-with-heap");
+        const end1 = performance.now();
 
-        console.time("dijkstra");
-        const { dist2, path2 } = Dijkstra(graph, start, end);
-        console.timeEnd("dijkstra");
+        // console.time("dijkstra");
+        const start2 = performance.now();
+        const { dist2, path2, ops2 } = Dijkstra(graph, start, end);
+        // console.timeEnd("dijkstra");
+        const end2 = performance.now();
 
-        highlightPath(path);
+        highlightPath(path2);
 
         const resultDiv = document.getElementById("result");
         resultDiv.innerHTML = `
-            <b>Длина пути:</b> ${dist}<br>
-            <b>Путь:</b> ${path.join(" → ")}
+            <b>Длина пути:</b> ${dist2}<br>
+            <b>Путь:</b> ${path2.join(" → ")} <br>
+            <b>Дейкстра обычная:</b> ${ops2} (${end2 - start2}) ms <br>
+            <b>Дейкстра с кучей:</b> ${ops} (${end1 - start1}) ms <br>
         `;
-    })
+    });
